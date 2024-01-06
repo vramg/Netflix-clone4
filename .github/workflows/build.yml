@@ -10,10 +10,14 @@ jobs:
        uses: actions/checkout@v4
 
     -  name: List and Read Files
-       run: 
+       run: |
         echo "This is a pipeline for Netflix clone App"
         ls -lrta
         cat README.md
+
+    -  name: Generate ASCII ArtWork
+       run: cowsay -f dragon "Run for cover, I am a Dragon....RAWR" >> dragon.txt
+
 
     # - name: List Files
     #   run: ls
