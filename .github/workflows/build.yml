@@ -9,11 +9,14 @@ jobs:
     -  name: Checkout Repo
        uses: actions/checkout@v4
 
-    -  name: Welcome Message
-       run: echo "This is a pipeline for Netflix clone App"
+    -  name: List and Read Files
+       run: 
+        echo "This is a pipeline for Netflix clone App"
+        ls -lrta
+        cat README.md
 
-    - name: List Files
-      run: ls
+    # - name: List Files
+    #   run: ls
 
-    - name: Read file
-      run: cat README.md
+    # - name: Read file
+    #   run: cat README.md
