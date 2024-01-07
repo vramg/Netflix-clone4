@@ -1,0 +1,28 @@
+name: Matrix Configuration
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+    deploy:
+      strategy:
+        fail-fast: false   #disable fail-fast using false. This prevents GitHub from cancelling any job in prgress if any job in the matrix fails
+        max-parallel: 2     # control the number of jobs that can run parrelling by setting it to 2 parrallel jobs
+        matrix:
+          os: [ubuntu-latest, ubuntu-20.04, windows-latest]
+          images: [hello-world, alpine]
+            # This is supposed to run 6 jobs, but will not run up to 6 because of the exclude operation
+          exclude:
+            - images: alpine
+              os: windows-latest
+          include:
+            - images: amd64/alpine
+              os: ubuntu-20.04
+      runs-on: ${{ matrix.os }}
+      steps:
+      - name: Echo Docker Details
+        run: docker info
+
+      - name: Run Image on ${{ matrix.os }}
+        run: docker run ${{ matrix.images }}
