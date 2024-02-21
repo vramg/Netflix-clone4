@@ -40,3 +40,17 @@ jobs:
           docker push chandra1243/netflix:latest
         env:
           DOCKER_CLI_ACI: 1
+
+
+
+  deploy:    
+    needs: build-analyze-scan  
+    runs-on: [ip-172-31-2-49]  
+    steps:
+      - name: Pull the docker image
+        run: docker pull chandra1243/netflix:latest
+      - name: Trivy image scan
+        run: trivy image chandra1243/netflix:latest
+      - name: Run the container netflix
+        run: docker run -d --name netflix -p 8085:80 chandra1243/netflix:latest
+
