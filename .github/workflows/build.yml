@@ -43,7 +43,7 @@ jobs:
 
   deploy:    
     needs: build-analyze-scan  
-    runs-on: [linux]  
+    runs-on: [Linux]  
     steps:
       - name: Pull the docker image
         run: docker pull chandra1243/netflix:latest
