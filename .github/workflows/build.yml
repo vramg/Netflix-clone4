@@ -43,7 +43,7 @@ jobs:
 
   deploy:    
     needs: build-analyze-scan  
-    runs-on: [aws-eks]  
+    runs-on: [linux]  
     steps:
       - name: Pull the docker image
         run: docker pull chandra1243/netflix:latest
