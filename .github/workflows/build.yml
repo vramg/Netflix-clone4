@@ -42,9 +42,9 @@ jobs:
 
 
   deploy:    
-   
-    runs-on: ubuntu-latest 
-    steps:
+   needs: build-analyze-scan
+   runs-on: [ubuntu-latest ]
+   steps:
       - name: Pull the docker image
         run: docker pull chandra1243/netflix:latest
       - name: Trivy image scan
