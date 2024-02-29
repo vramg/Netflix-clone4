@@ -1,26 +1,30 @@
 name: CommitCheck for poc
+
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - "main"
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - "main"
+
 jobs:
   check-commit-message:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
       - name: Check commit message format
         id: check-message
         run: |
           commit_message=$(git log -1 --pretty=%B)
-          if [[ ! $commit_message =~ ^CHAN-[a-zA-Z0-9\s\S]* ]];  then
-            echo "Commit message must start with 'V2FS-name', but found: '$commit_message'"
+          if [[ ! $commit_message =~ ^chan-[a-zA-Z0-9\s\S]* ]]; then
+            echo "Commit message must start with 'V2FS-', but found: '$commit_message'"
             exit 1
           fi
+          
       - name: Continue workflow if check passes
-        uses: actions/github-script@v6
-        with:
-          github-script: |
-            if (steps.check-message.outputs == 0) {
-              core.setFailed(false);
-            }
+        if: ${{ failure() }}
+        run: echo "Workflow continues as check passed"
