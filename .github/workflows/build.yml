@@ -1,35 +1,27 @@
-name: Build
-
+name: CommitCheck for poc
 on:
   push:
-    branches:
-      - main
-
-
+    branches: [ "antd-poc" ]
+  pull_request:
+    branches: [ "master" ]
 jobs:
-  build:
-    name: Build
-    runs-on: aws-eks
+  check-commit-message:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          
-      - name: npm install dependency
-        run: npm install
-      - name: Trivy file scan
-        run: trivy fs . > trivyfs.txt
-
-      - name: Docker Build and push
+      - uses: actions/checkout@v3
+      - name: Check commit message format
+        id: check-message
         run: |
-          docker build -t tic-tac-toe .
-          docker tag tic-tac-toe chandrahas1243/tic-tac-toe:latest
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          docker push chandrahas1243/tic-tac-toe:latest
-        env:
-          DOCKER_CLI_ACI: 1
-      
+          commit_message=$(git log -1 --pretty=%B)
+          if [[ ! $commit_message =~ ^CHAN-[a-zA-Z0-9\s\S]* ]];  then
+            echo "Commit message must start with 'V2FS-name', but found: '$commit_message'"
+            exit 1
+          fi
+      - name: Continue workflow if check passes
+        uses: actions/github-script@v6
+        with:
+          github-script: |
+            if (steps.check-message.outputs == 0) {
+              core.setFailed(false);
+            }
+            
