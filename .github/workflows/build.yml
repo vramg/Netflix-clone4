@@ -24,4 +24,3 @@ jobs:
             if (steps.check-message.outputs == 0) {
               core.setFailed(false);
             }
-            
