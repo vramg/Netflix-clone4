@@ -7,7 +7,6 @@ on:
   pull_request:
     branches: 
       - "main"
-
 jobs:
   check-commit-message:
     runs-on: ubuntu-latest
