@@ -8,7 +8,7 @@ pipeline{
    }
    stage('Brach'){
       steps{
-        echo 'hello rishabh net'
+        echo 'webhook trigger'
       }
    }
 }
