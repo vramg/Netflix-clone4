@@ -1,4 +1,4 @@
-name: Build and push
+name: Build and Deploy Workflow
 
 on:
   push:
@@ -40,6 +40,7 @@ jobs:
 
           # Scan the current directory
           trivy fs .
+
       # Step 4: Docker Build and Push
       - name: Docker Build and Push
         run: |
@@ -50,3 +51,29 @@ jobs:
           docker push pavan9505/netflix1:latest
         env:
           DOCKER_CLI_ACI: 1
+
+  deploy:
+    needs: build-analyze-scan
+    runs-on: [aws-netflix]
+    steps:
+      # Step 1: Install Trivy
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      # Step 2: Pull the Docker Image
+      - name: Pull the Docker Image
+        run: docker pull pavan9505/netflix1:latest
+
+      # Step 3: Trivy Image Scan
+      - name: Trivy Image Scan
+        run: trivy image pavan9505/netflix1:latest
+
+      # Step 4: Run the Container
+      - name: Run the Container Netflix
+        run: docker run -d --name netflix -p 8081:80 pavan9505/netflix:latest
