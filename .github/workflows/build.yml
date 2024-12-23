@@ -40,3 +40,13 @@ jobs:
 
           # Scan the current directory
           trivy fs .
+      # Step 4: Docker Build and Push
+      - name: Docker Build and Push
+        run: |
+          # Build and push Docker image
+          docker build --build-arg TMDB_V3_API_KEY=f3709a71803ec3f4047f279972929ce6 -t netflix .
+          docker tag netflix pavan9505/netflix1:latest
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push pavan9505/netflix:latest
+        env:
+          DOCKER_CLI_ACI: 1
