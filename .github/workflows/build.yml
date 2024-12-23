@@ -1,26 +1,42 @@
-name: Build
+name: Build and Deploy Workflow
 
 on:
   push:
     branches:
       - main
 
-
 jobs:
-  build:
-    name: Build
+  build-analyze-scan:
+    name: Build, Analyze, and Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
+          fetch-depth: 0 # Ensures a full clone for better analysis
+
+      # Step 2: Run SonarQube Scan
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # Step 3: Install and Run Trivy for File System Scan
+      - name: Install and Run Trivy for FS Scan
+        run: |
+          # Install dependencies
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+
+          # Add Trivy GPG key and repository
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+
+          # Update package list and install Trivy
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+          # Scan the current directory
+          trivy fs .
